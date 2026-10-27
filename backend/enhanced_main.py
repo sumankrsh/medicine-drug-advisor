@@ -94,18 +94,24 @@ def check_drug_interaction(drug1_name: str, drug2_name: str) -> Dict[str, Any]:
     drug1_generic, drug1_info = drug1_data
     drug2_generic, drug2_info = drug2_data
     
-    # Check if drug2 is in drug1's interactions
+    # Check each drug's listed interactions for the other drug (both directions)
     interactions_found = []
-    
-    for interaction in drug1_info.get('interactions', []):
-        if drug2_generic in interaction.lower() or any(brand.lower() in interaction.lower() for brand in drug2_info['brand_names']):
-            interactions_found.append({
-                "type": "direct",
-                "description": f"{drug1_info['generic_name']} may interact with {drug2_info['generic_name']}"
-            })
-    
-    # Check category-based interactions
-    if drug1_info['category'] == 'Benzodiazepine' and drug2_info['category'] == 'Benzodiazepine':
+
+    def lists_other(info: Dict[str, Any], other_generic: str, other_info: Dict[str, Any]) -> bool:
+        for interaction in info.get('interactions', []):
+            text = interaction.lower()
+            if other_generic in text or any(brand.lower() in text for brand in other_info['brand_names']):
+                return True
+        return False
+
+    if lists_other(drug1_info, drug2_generic, drug2_info) or lists_other(drug2_info, drug1_generic, drug1_info):
+        interactions_found.append({
+            "type": "direct",
+            "description": f"{drug1_info['generic_name']} may interact with {drug2_info['generic_name']}"
+        })
+
+    # Check category-based interactions (categories look like "Benzodiazepine (Anti-anxiety)")
+    if 'Benzodiazepine' in drug1_info['category'] and 'Benzodiazepine' in drug2_info['category']:
         interactions_found.append({
             "type": "category",
             "description": "Using multiple benzodiazepines increases risk of excessive sedation and respiratory depression"
@@ -128,6 +134,8 @@ def check_drug_interaction(drug1_name: str, drug2_name: str) -> Dict[str, Any]:
     return {
         "interaction_found": len(interactions_found) > 0,
         "interactions": interactions_found,
+        "drug1_found": True,
+        "drug2_found": True,
         "drug1_info": drug1_info,
         "drug2_info": drug2_info
     }
@@ -242,7 +250,11 @@ async def check_drug_interaction_endpoint(request: DrugInteractionRequest):
         response += "\nAlways consult your healthcare provider before taking these medications together."
     else:
         if result.get('drug1_found') and result.get('drug2_found'):
-            response = f"✅ No major interactions found between {request.drug1} and {request.drug2}. However, always consult your healthcare provider before combining medications."
+            response = (
+                f"No interaction between {request.drug1} and {request.drug2} is listed in this demo database. "
+                "That does not mean the combination is safe: the database is small. "
+                "Always check with a doctor or pharmacist before combining medications."
+            )
         else:
             response = result['response']
     
