@@ -1,189 +1,152 @@
-# 🏥 Medicine & Drug Interaction Advisor
+# Medicine & Drug Interaction Advisor
 
-An AI-powered comprehensive medicine database and drug interaction checker with special focus on Indian medicines and mental health medications. Built with FastAPI, React, and RAG (Retrieval-Augmented Generation) architecture.
+A drug-information and interaction checker for common Indian and mental-health medicines. A FastAPI backend answers questions such as "What are the side effects of sertraline?" from a curated database of 34 medicines, and a browser front end lets you search, build a medication list and check it for interactions. The repo also includes an experimental RAG version built with LangChain, FAISS and OpenAI.
 
-![Python](https://img.shields.io/badge/python-v3.8+-blue.svg)
+![Python](https://img.shields.io/badge/python-3.8--3.11-blue.svg)
 ![FastAPI](https://img.shields.io/badge/FastAPI-0.104.1-green.svg)
-![React](https://img.shields.io/badge/React-18.2.0-blue.svg)
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
 
-## 🌟 Features
+> **Medical disclaimer:** this is a learning project, not medical advice. Always check with a doctor or pharmacist before starting, stopping or combining medicines.
 
-### 🔍 Comprehensive Drug Database
-- **45+ Medications** including Indian brands
-- **20+ Mental Health Drugs**: Antidepressants, Anti-anxiety, Antipsychotics, Mood stabilizers
-- **Indian Medicines**: Crocin, Combiflam, Pan 40, Ecosprin, and more
-- **Ayurvedic Options**: Ashwagandha, Triphala, Tulsi
+## What it covers
 
-### 💊 Advanced Features
-- **Drug Interaction Checker**: Check safety of drug combinations
-- **Pill Identifier**: Identify pills by appearance
-- **Medicine by Condition**: Browse drugs by health condition
-- **Voice Search**: Search medicines using voice
-- **Price Information**: Indian market prices in INR
-- **Prescription Status**: Know which drugs need prescription
+**34 medicines** in `backend/comprehensive_drug_database.py`, each with Indian and international brand names, uses, side effects, dosage, warnings, known interactions, an approximate price range in INR, and whether it needs a prescription or is a controlled substance.
 
-### 🧠 Mental Health Focus
-- Comprehensive information on psychotropic medications
-- Controlled substance warnings
-- Detailed side effects and interactions
-- Dosage guidelines
+- **20 mental-health medicines:** antidepressants, anti-anxiety medicines, antipsychotics, mood stabilisers, and ADHD and wakefulness medicines
+- **12 common medicines:** pain and fever, antibiotics, diabetes, blood pressure, cholesterol, acidity, allergy and asthma, steroids and vitamin D
+- **2 Ayurvedic options:** ashwagandha and triphala
 
-## 🚀 Quick Start
+## Features
 
-### Prerequisites
-- Python 3.8+
-- Node.js 14+
-- Git
+- **Ask a question:** side effects, uses or dosage for a medicine, by generic or brand name
+- **Interaction checker:** check two medicines against the interactions listed in the database
+- **My medications:** build a list in the browser and check all pairs at once
+- **Browse:** medicines by category, by health condition, or the full list
+- **Mental-health view:** all mental-health medicines grouped by type
 
-### Backend Setup
+Not built yet: the **Pill identifier**, **Compare** and **voice search** buttons appear in the front end but aren't wired up.
 
-1. Clone the repository:
+## Quick start
+
+You need Python 3.8 to 3.11. Some versions pinned in `requirements.txt` have no builds for Python 3.12 or later.
+
+**1. Get the code**
+
 ```bash
-git clone https://github.com/yourusername/medicine-drug-advisor.git
+git clone https://github.com/sumankrsh/medicine-drug-advisor.git
 cd medicine-drug-advisor
-```
-
-2. Set up Python virtual environment:
-```bash
 python -m venv venv
 source venv/bin/activate  # On Windows: venv\Scripts\activate
 ```
 
-3. Install backend dependencies:
+**2. Start the API**
+
+The default API only needs three packages:
+
 ```bash
 cd backend
-pip install -r requirements.txt
-```
-
-4. Set up environment variables:
-```bash
-cp .env.example .env
-# Add your OpenAI API key to .env (optional for enhanced features)
-```
-
-5. Run the backend server:
-```bash
+pip install fastapi==0.104.1 uvicorn==0.24.0 pydantic==2.4.2
 python enhanced_main.py
 ```
 
-The API will be available at `http://localhost:8000`
+It runs at http://localhost:8000, with interactive API docs at http://localhost:8000/docs.
 
-### Frontend Setup
+**3. Open the front end**
 
-1. Navigate to frontend directory:
-```bash
-cd ../frontend
-npm install
-```
+With the API running, open `frontend/enhanced-index.html` in your browser (double-click it, or run `open frontend/enhanced-index.html` on a Mac from the repo root). There's nothing to install or build.
 
-2. Start the development server:
-```bash
-# Open the enhanced HTML file in your browser
-open enhanced-index.html  # On Mac
-# Or simply double-click the enhanced-index.html file
-```
+## API endpoints
 
-## 📋 API Endpoints
+| Method | Path | What it does |
+|---|---|---|
+| `POST` | `/query` | Answer a plain-English question about a medicine |
+| `POST` | `/check-interaction` | Check two medicines for listed interactions |
+| `GET` | `/drug/{drug_name}` | Full details for one medicine |
+| `GET` | `/mental-health-drugs` | Mental-health medicines grouped by type |
+| `GET` | `/search/{category}` | Medicines in a category, such as `antidepressant` |
+| `GET` | `/all-drugs` | Every medicine in the database |
 
-### Core Endpoints
-
-- `POST /query` - Process natural language queries about medicines
-- `POST /check-interaction` - Check interactions between two drugs
-- `GET /drug/{drug_name}` - Get detailed information about a specific drug
-- `GET /mental-health-drugs` - List all mental health medications
-- `GET /search/{category}` - Search drugs by category
-- `GET /all-drugs` - Get complete drug list
-
-### Example Queries
+Examples:
 
 ```bash
-# Check drug information
+# Ask about a medicine
 curl -X POST http://localhost:8000/query \
   -H "Content-Type: application/json" \
   -d '{"query": "What are the side effects of sertraline?"}'
 
-# Check drug interaction
+# Check an interaction
 curl -X POST http://localhost:8000/check-interaction \
   -H "Content-Type: application/json" \
-  -d '{"drug1": "alprazolam", "drug2": "alcohol"}'
+  -d '{"drug1": "sertraline", "drug2": "ibuprofen"}'
 ```
 
-## 🧪 Sample Medications
+## Sample medicines
 
-### Mental Health Drugs
-- **Antidepressants**: Sertraline (Zoloft), Fluoxetine (Prozac), Escitalopram (Lexapro)
-- **Anti-anxiety**: Alprazolam (Xanax), Clonazepam (Klonopin), Lorazepam (Ativan)
-- **Antipsychotics**: Quetiapine (Seroquel), Olanzapine (Zyprexa), Risperidone (Risperdal)
-- **Mood Stabilizers**: Lithium, Valproate (Depakote), Carbamazepine (Tegretol)
+**Mental health**
 
-### Common Indian Medicines
-- **Pain/Fever**: Crocin, Dolo 650, Combiflam
-- **Acid/Gastric**: Pan 40, Omez
-- **Antibiotics**: Azithral, Augmentin
-- **Heart/BP**: Ecosprin, Amlodipine
+- Antidepressants: sertraline (Zoloft), fluoxetine (Prozac), escitalopram (Lexapro), bupropion, mirtazapine, venlafaxine, duloxetine
+- Anti-anxiety: alprazolam (Xanax), clonazepam (Klonopin), lorazepam (Ativan)
+- Antipsychotics: quetiapine (Seroquel), olanzapine (Zyprexa), risperidone (Risperdal), aripiprazole (Abilify)
+- Mood stabilisers: lithium, valproate (Depakote), carbamazepine (Tegretol)
+- ADHD and wakefulness: methylphenidate (Ritalin), atomoxetine (Strattera), modafinil (Modalert)
 
-## 🏗️ Architecture
+**Common Indian brands**
+
+- Pain and fever: Crocin, Dolo 650 (paracetamol); Brufen, Combiflam (ibuprofen)
+- Antibiotics: Azithral (azithromycin), Novamox (amoxicillin)
+- Diabetes, blood pressure, cholesterol: Glycomet (metformin), Amlong (amlodipine), Atorva (atorvastatin)
+- Acidity and allergy: Omez (omeprazole), Cetzine (cetirizine), Montair (montelukast)
+
+## Project structure
 
 ```
 medicine-drug-advisor/
 ├── backend/
-│   ├── enhanced_main.py          # FastAPI application
-│   ├── comprehensive_drug_database.py  # Drug database
-│   ├── rag_pipeline.py          # RAG implementation
-│   ├── vector_db.py            # FAISS vector database
-│   └── requirements.txt
+│   ├── enhanced_main.py                # Default API (FastAPI, in-memory database)
+│   ├── comprehensive_drug_database.py  # The 34-medicine database
+│   ├── main.py                         # Experimental RAG API
+│   ├── rag_pipeline.py                 # RAG pipeline (LangChain + OpenAI)
+│   ├── vector_db.py                    # FAISS vector store with sentence-transformers
+│   ├── data_fetcher.py                 # openFDA and RxNorm client
+│   ├── indian_data_fetcher.py          # Helpers for Indian medicine datasets
+│   ├── test_main.py                    # Demo-mode API with canned answers
+│   ├── requirements.txt
+│   └── .env.example
 ├── frontend/
-│   ├── enhanced-index.html     # Main UI (dark theme)
-│   └── index.html             # Alternative UI
-└── README.md
+│   ├── enhanced-index.html             # Main UI
+│   └── index.html                      # Earlier, simpler UI
+├── scripts/
+│   └── initialize_db.py                # Builds the vector store for the RAG API
+├── DEMO.md                             # Example queries to try
+└── LICENSE
 ```
 
-## 🔧 Technology Stack
+## Experimental RAG version
 
-- **Backend**: FastAPI, Python, LangChain, FAISS
-- **Frontend**: HTML5, Tailwind CSS, JavaScript
-- **Database**: In-memory comprehensive drug database
-- **APIs**: FDA OpenFDA, RxNorm (optional)
+`backend/main.py` is a separate API that retrieves drug-label text with FAISS and generates answers with an OpenAI model through LangChain. To try it:
 
-## 🚨 Important Notes
+```bash
+cd backend
+pip install -r requirements.txt
+cp .env.example .env               # then add your OpenAI API key to .env
+python ../scripts/initialize_db.py # builds the vector store
+python main.py
+```
 
-### Medical Disclaimer
-This tool is for educational and informational purposes only. Always consult with qualified healthcare professionals before making any medical decisions.
+## Built with
 
-### Controlled Substances
-Some medications in the database are controlled substances. These require special prescriptions and have strict regulations.
+- **Backend:** Python, FastAPI
+- **RAG version:** LangChain, FAISS, sentence-transformers, OpenAI, openFDA and RxNorm
+- **Front end:** HTML, JavaScript, Tailwind CSS
 
-### Data Sources
-- FDA approved drug information
-- Indian pharmaceutical databases
-- Clinical drug interaction databases
+## Contributing
 
-## 🤝 Contributing
+Issues and pull requests are welcome. Please open an issue first for larger changes.
 
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
+## License
 
-## 📝 License
+MIT. See [LICENSE](LICENSE).
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+## Contact
 
-## 🙏 Acknowledgments
-
-- FDA OpenFDA for drug label data
-- RxNorm for drug interaction data
-- Indian pharmaceutical companies for drug information
-- Open source community for amazing tools
-
-## 📧 Contact
-
-Your Name - [@yourtwitter](https://twitter.com/yourtwitter)
-
-Project Link: [[https://github.com/sumankrsh/medicine-drug-advisor]
-
----
-
-**⚠️ Medical Disclaimer**: This application provides general information only. It is not intended as medical advice. Always consult healthcare professionals for medical decisions.
+Built by Suman Mukherjee. Questions or ideas: [contactme@mukherjeesuman.com](mailto:contactme@mukherjeesuman.com) · [mukherjeesuman.com](https://www.mukherjeesuman.com)
